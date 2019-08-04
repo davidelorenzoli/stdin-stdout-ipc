@@ -10,15 +10,25 @@ import (
 )
 
 func main() {
-	executablePath, err := os.Executable()
+	executablePath, _ := os.Executable()
 	executableDir := path.Dir(executablePath)
 	childExecutablePath := path.Join(executableDir, "child")
 
-	command := exec.Command(childExecutablePath)
+	processOutputReader := execute(childExecutablePath)
+
+	read(processOutputReader)
+
+	log.Printf("Execution completed")
+}
+
+// execute run the given executable. In case of error it calls `os.Exit(1)`
+func execute(executablePath string) io.ReadCloser {
+	command := exec.Command(executablePath)
 	pipeReader, _ := command.StdoutPipe()
 
 	log.Printf("Launching executable %s", command.Path)
-	err = command.Start()
+
+	err := command.Start()
 
 	if err != nil {
 		log.Fatal(err)
@@ -26,12 +36,11 @@ func main() {
 
 	log.Printf("Process started. PID %d", command.Process.Pid)
 
-	readProcessOutput(pipeReader)
-
-	log.Printf("Terminated")
+	return pipeReader
 }
 
-func readProcessOutput(readCloser io.ReadCloser) {
+// read read from ReadCloser and log its content
+func read(readCloser io.ReadCloser) {
 	reader := bufio.NewReader(readCloser)
 
 	for hasNext := true; hasNext; {
