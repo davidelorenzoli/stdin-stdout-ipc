@@ -15,14 +15,18 @@ func main() {
 
 	daemonIpc := execute(childExecutablePath)
 
-	daemonIpc.ListenForMessages();
+	daemonIpc.ListenForMessages(messageHandler)
 	log.Printf("Execution completed")
+}
+
+func messageHandler(message string) {
+	log.Printf("Received message: %s", string(message))
 }
 
 // execute run the given executable. In case of error it calls `os.Exit(1)`
 func execute(executablePath string) ipc.DaemonIpc {
 	command := exec.Command(executablePath)
-	pipeReader, err := command.StdoutPipe();
+	pipeReader, err := command.StdoutPipe()
 
 	if err != nil {
 		log.Fatal(err)

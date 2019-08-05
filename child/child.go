@@ -13,7 +13,7 @@ func main() {
 
 	log.Printf("Start waiting for messages")
 	go func() {
-		daemonIpc.ListenForMessages()
+		daemonIpc.ListenForMessages(messageHandler)
 	}()
 
 	log.Printf("Start sending messages")
@@ -28,4 +28,8 @@ func main() {
 
 		time.Sleep(time.Second)
 	}
+}
+
+func messageHandler(message string) {
+	log.Printf("Received message: %s", string(message))
 }

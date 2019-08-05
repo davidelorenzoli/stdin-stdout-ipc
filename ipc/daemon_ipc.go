@@ -11,6 +11,8 @@ type DaemonIpc struct {
 	writer io.Writer
 }
 
+type MessageHandler func(message string)
+
 /*
 NewDaemonIpc create an instance of NewDaemonIpc
 		reader reads from a data source
@@ -30,12 +32,12 @@ func (daemonIpc DaemonIpc) SendMessage(message string) error {
 	if err != nil {
 		log.Println("Failed to send message", err)
 	}
-	
+
 	return err
 }
 
 // listenForMessages blocking function that listens for messages from the reader
-func (daemonIpc DaemonIpc) ListenForMessages() {
+func (daemonIpc DaemonIpc) ListenForMessages(messageHandler MessageHandler) {
 	reader := bufio.NewReader(daemonIpc.reader)
 
 	for hasNext := true; hasNext; {
@@ -44,7 +46,7 @@ func (daemonIpc DaemonIpc) ListenForMessages() {
 		hasNext = line != ""
 
 		if hasNext {
-			log.Printf("Received message: %s", string(line))
+			messageHandler(line)
 		}
 	}
 }
