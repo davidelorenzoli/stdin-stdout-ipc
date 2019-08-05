@@ -6,7 +6,13 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
+	"time"
 )
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
 	executablePath, _ := os.Executable()
@@ -15,12 +21,24 @@ func main() {
 
 	daemonIpc := execute(childExecutablePath)
 
-	daemonIpc.ListenForMessages(messageHandler)
+	go daemonIpc.ListenForMessages(messageHandler)
+
+	for i := 0; i < 10; i++ {
+		message := "parent-" + strconv.Itoa(i) + "\n"
+		err := daemonIpc.SendMessage(message)
+
+		if err != nil {
+			log.Printf("Failed to send message. Error %s", err)
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
 	log.Printf("Execution completed")
 }
 
 func messageHandler(message string) {
-	log.Printf("Received message: %s", string(message))
+	log.Printf("Received message: %s", message)
 }
 
 // execute run the given executable. In case of error it calls `os.Exit(1)`

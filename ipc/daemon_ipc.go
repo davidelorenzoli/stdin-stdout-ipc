@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"log"
+	"strings"
 )
 
 type DaemonIpc struct {
@@ -30,7 +31,7 @@ func (daemonIpc DaemonIpc) SendMessage(message string) error {
 	_, err := daemonIpc.writer.Write([]byte(message))
 
 	if err != nil {
-		log.Println("Failed to send message", err)
+		log.Printf("Failed to send message. Error %s", err)
 	}
 
 	return err
@@ -38,6 +39,8 @@ func (daemonIpc DaemonIpc) SendMessage(message string) error {
 
 // listenForMessages blocking function that listens for messages from the reader
 func (daemonIpc DaemonIpc) ListenForMessages(messageHandler MessageHandler) {
+	log.Printf("Hello")
+
 	reader := bufio.NewReader(daemonIpc.reader)
 
 	for hasNext := true; hasNext; {
@@ -46,7 +49,7 @@ func (daemonIpc DaemonIpc) ListenForMessages(messageHandler MessageHandler) {
 		hasNext = line != ""
 
 		if hasNext {
-			messageHandler(line)
+			messageHandler(strings.TrimSuffix(line, "\n"))
 		}
 	}
 }
