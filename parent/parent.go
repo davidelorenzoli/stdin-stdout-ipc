@@ -1,8 +1,7 @@
 package main
 
 import (
-	"bufio"
-	"io"
+	"lab/parent-child-ipc/ipc"
 	"log"
 	"os"
 	"os/exec"
@@ -14,21 +13,30 @@ func main() {
 	executableDir := path.Dir(executablePath)
 	childExecutablePath := path.Join(executableDir, "child")
 
-	processOutputReader := execute(childExecutablePath)
+	daemonIpc := execute(childExecutablePath)
 
-	read(processOutputReader)
-
+	daemonIpc.ListenForMessages();
 	log.Printf("Execution completed")
 }
 
 // execute run the given executable. In case of error it calls `os.Exit(1)`
-func execute(executablePath string) io.ReadCloser {
+func execute(executablePath string) ipc.DaemonIpc {
 	command := exec.Command(executablePath)
-	pipeReader, _ := command.StdoutPipe()
+	pipeReader, err := command.StdoutPipe();
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pipeWriter, err := command.StdinPipe()
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Printf("Launching executable %s", command.Path)
 
-	err := command.Start()
+	err = command.Start()
 
 	if err != nil {
 		log.Fatal(err)
@@ -36,20 +44,5 @@ func execute(executablePath string) io.ReadCloser {
 
 	log.Printf("Process started. PID %d", command.Process.Pid)
 
-	return pipeReader
-}
-
-// read read from ReadCloser and log its content
-func read(readCloser io.ReadCloser) {
-	reader := bufio.NewReader(readCloser)
-
-	for hasNext := true; hasNext; {
-		line, _ := reader.ReadString('\n')
-
-		hasNext = line != ""
-
-		if hasNext {
-			log.Printf("Received message: %s", string(line))
-		}
-	}
+	return ipc.NewDaemonIpc(pipeReader, pipeWriter)
 }
