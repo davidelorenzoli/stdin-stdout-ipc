@@ -39,8 +39,6 @@ func (daemonIpc DaemonIpc) SendMessage(message string) error {
 
 // listenForMessages blocking function that listens for messages from the reader
 func (daemonIpc DaemonIpc) ListenForMessages(messageHandler MessageHandler) {
-	log.Printf("Hello")
-
 	reader := bufio.NewReader(daemonIpc.reader)
 
 	for hasNext := true; hasNext; {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"lab/parent-child-ipc/ipc"
+	"lab/parent-child-ipc/pkg/ipc"
 	"log"
 	"os"
 	"strconv"

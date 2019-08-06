@@ -18,13 +18,13 @@ build:
 ifeq ($(OS), Darwin)
 	export GOOS=${DISTR_MAC}
 	export GOARCH=${ARCH}
-	go build -v -o ${BIN_DIR}/child ./child
-	go build -v -o ${BIN_DIR}/parent ./parent
+	go build -v -o ${BIN_DIR}/child ./cmd/child
+	go build -v -o ${BIN_DIR}/parent ./cmd/parent
 else ifeq ($(OS), Windows)
 	set GOOS=${DISTR_WIN}
 	set GOARCH=${ARCH}
-	go build -v -o ${BIN_DIR}/child.exe ./child
-	go build -v -o ${BIN_DIR}/parent.exe ./parent
+	go build -v -o ${BIN_DIR}/child.exe ./cmd/child
+	go build -v -o ${BIN_DIR}/parent.exe ./cmd/parent
 else
 	@echo Failed to build. OS $(OS) not supported
 endif
